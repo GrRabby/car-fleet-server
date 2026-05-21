@@ -108,8 +108,6 @@ async function run() {
         try {
             const userId = req.user.id;
             const { carId } = req.params;
-
-            // Find any non-cancelled booking by this user for this car
             const booking = await bookingCollections.findOne({
                 userID: userId,
                 carId: carId,
@@ -172,6 +170,29 @@ async function run() {
             res.json(bookings);
         } catch (err) {
             res.status(500).json({ error: 'Failed to fetch bookings' });
+        }
+    });
+    app.delete('/bookings/:id', verifyToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+
+            const booking = await bookingCollections.findOne({ _id: new ObjectId(id) });
+            if (!booking) {
+                return res.status(404).json({ error: 'Booking not found' });
+            }
+            if (booking.userID !== userId) {
+                return res.status(403).json({ error: 'Not authorized' });
+            }
+            await bookingCollections.deleteOne({ _id: new ObjectId(id) });
+            await carCollections.updateOne(
+                { _id: new ObjectId(booking.carId) },
+                { $inc: { booking_count: -1 } }
+            );
+
+            res.json({ success: true });
+        } catch (err) {
+            res.status(500).json({ error: 'Failed to cancel booking' });
         }
     });
   } finally {
