@@ -161,7 +161,19 @@ async function run() {
       const {id} = req.params;
       const result = await carCollections.find({userID: id }).toArray()
       res.json(result)
-    })
+    });
+    app.get('/my-bookings', verifyToken, async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const bookings = await bookingCollections
+                .find({ userID: userId })
+                .sort({ createdAt: -1 })
+                .toArray();
+            res.json(bookings);
+        } catch (err) {
+            res.status(500).json({ error: 'Failed to fetch bookings' });
+        }
+    });
   } finally {
     // await client.close();
   }
