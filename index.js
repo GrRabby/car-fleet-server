@@ -52,6 +52,10 @@ async function run() {
     const carCollections = db.collection('CarList')
     const bookingCollections = db.collection('Bookings')
 
+    app.get('/', async (req,res) => {
+        const result = await carCollections.find().limit(6).toArray()
+        res.json(result)
+    })
   } finally {
     // await client.close();
   }
