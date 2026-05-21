@@ -90,6 +90,11 @@ async function run() {
 
       res.json(result);
     });
+    app.post('/add-car', verifyToken ,async (req,res) => {
+      const carDetails = req.body
+      const result = await carCollections.insertOne(carDetails)
+      res.json(result)
+    })
   } finally {
     // await client.close();
   }
