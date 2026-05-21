@@ -104,6 +104,38 @@ async function run() {
 
         res.json(car);
     });
+    app.get('/bookings/check/:carId', verifyToken, async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const { carId } = req.params;
+
+            // Find any non-cancelled booking by this user for this car
+            const booking = await bookingCollections.findOne({
+                userID: userId,
+                carId: carId,
+            });
+            res.json({
+                booked: !!booking,
+            });
+        } catch (err) {
+            console.error('Error checking booking:', err);
+            res.status(500).json({ error: 'Failed to check booking status' });
+        }
+    });
+    app.post('/bookings', verifyToken, async (req, res) => {
+        const bookingData = req.body;
+
+        const booking = {
+            ...bookingData,
+            createdAt: new Date().toISOString(),
+        };
+        const result = await bookingCollections.insertOne(booking);
+        await carCollections.updateOne(
+            { _id: new ObjectId(bookingData.carId) },
+            { $inc: { booking_count: 1 } }
+        );
+        res.json(result);
+    });
   } finally {
     // await client.close();
   }
