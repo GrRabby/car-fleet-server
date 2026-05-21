@@ -56,6 +56,40 @@ async function run() {
         const result = await carCollections.find().limit(6).toArray()
         res.json(result)
     })
+    app.get('/explore-cars', async (req, res) => {
+      const { search, type, availability, sort } = req.query;
+      const query = {};
+      if (search) {
+          query['name'] = {
+              $regex: search,
+              $options: 'i',
+          };
+      }
+      if (type && type !== 'All') {
+          query['type'] = { $in: [type] };
+      }
+      if (availability) {
+          query['availability'] = availability;
+      }
+      let sortOption = { createdAt: -1 };
+      switch (sort) {
+          case 'oldest':
+              sortOption = { createdAt: 1 };
+              break;
+          case 'priceHigh':
+              sortOption = { pricePerDay: -1 };
+              break;
+          case 'priceLow':
+              sortOption = { pricePerDay: 1 };
+              break;
+      }
+      const result = await carCollections
+          .find(query)
+          .sort(sortOption)
+          .toArray();
+
+      res.json(result);
+    });
   } finally {
     // await client.close();
   }
