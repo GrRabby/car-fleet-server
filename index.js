@@ -41,9 +41,6 @@ const verifyToken = async (req,res,next) => {
   }catch(error){
     return res.status(403).json({message : "Forbiden"})
   }
-  
-  
-  
 }
 async function run() {
   try {
