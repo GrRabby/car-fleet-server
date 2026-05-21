@@ -136,6 +136,32 @@ async function run() {
         );
         res.json(result);
     });
+    app.patch('/added-cars/:id',verifyToken, async (req, res) => {
+        const {id} = req.params;
+        const updatedData = req.body;
+
+        const result = await carCollections.updateOne(
+            { _id: new ObjectId(id) },
+            {
+                $set: updatedData
+            }
+        );
+
+        res.send(result);
+    });
+    app.delete('/added-cars/:id',verifyToken, async (req, res) => {
+        const {id} = req.params;
+        const result = await carCollections.deleteOne(
+            { _id: new ObjectId(id) },
+        );
+
+        res.send(result);
+    });
+    app.get('/added-cars/:id',verifyToken, async (req,res) => {
+      const {id} = req.params;
+      const result = await carCollections.find({userID: id }).toArray()
+      res.json(result)
+    })
   } finally {
     // await client.close();
   }
