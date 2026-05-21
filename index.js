@@ -95,6 +95,15 @@ async function run() {
       const result = await carCollections.insertOne(carDetails)
       res.json(result)
     })
+    app.get('/cars/:id', async (req, res) => {
+        const { id } = req.params;
+        const car = await carCollections.findOne({ _id: new ObjectId(id) });
+        if (!car) {
+            return res.status(404).json({ error: 'Car not found' });
+        }
+
+        res.json(car);
+    });
   } finally {
     // await client.close();
   }
